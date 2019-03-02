@@ -208,7 +208,7 @@ func getNext(edges []int, visited map[int]bool, rm map[int]*Room) *Room {
 
 func handle(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	var r struct {
-		Rooms   Rooms    `json:"rooms"`
+		Rooms   []*Room  `json:"rooms"`
 		Start   int      `json:"start"`
 		Objects []string `json:"objects"`
 	}
@@ -218,7 +218,9 @@ func handle(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 		log.Println(err)
 	}
 
-	rm, steps := traverse(&r.Rooms, r.Start, r.Objects)
+	rooms := Rooms{r.Rooms}
+
+	rm, steps := traverse(&rooms, r.Start, r.Objects)
 
 	type step struct {
 		ID      int      `json:"ID"`
