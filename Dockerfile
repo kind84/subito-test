@@ -6,6 +6,9 @@ COPY ./scripts ../mnt/scripts
 
 RUN apk update && apk add git gcc libc-dev
 RUN go get -d -v ./...
+RUN chmod +x /mnt/scripts/build.sh
+RUN chmod +x /mnt/scripts/tests.sh
+RUN chmod +x /mnt/scripts/run.sh
 # RUN go install -v ./...
 
 # CMD ["app"]

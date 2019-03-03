@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -57,56 +58,71 @@ func main() {
 
 	go func() {
 		mux := httprouter.New()
+		mux.GET("/", index)
 		mux.POST("/rooms", handle)
 		log.Fatal(http.ListenAndServe(":9090", mux))
 	}()
 
 	for {
+		var (
+			r string
+			s int
+			o string
+		)
+		r = *jRooms
+		s = *start
+		o = *sObjects
+
 		var mapPath string
-		if *jRooms == "" {
+
+		scanner := bufio.NewScanner(os.Stdin)
+		if r == "" {
 			fmt.Print("Enter path to rooms map JSON file: ")
 			_, err := fmt.Scanf("%s\n", &mapPath)
-			if err != nil {
-				panic(err)
+			if err != nil && err != io.EOF {
+				fmt.Println("Cannot read input: ", err)
+				continue
 			}
 		}
-		if *start == 0 {
+		if s == 0 {
 			fmt.Print("Enter starting room ID: ")
-			_, err := fmt.Scanf("%d\n", start)
-			if err != nil {
-				panic(err)
+			_, err := fmt.Scanf("%d\n", &s)
+			if err != nil && err != io.EOF {
+				log.Println("The input value is not a valid number: ", err)
+				continue
 			}
 		}
-		if *sObjects == "" {
-			scanner := bufio.NewScanner(os.Stdin)
+		if o == "" {
 			fmt.Print("Enter objects to collect separated by comma: ")
 			for scanner.Scan() {
-				*sObjects = scanner.Text()
+				o = scanner.Text()
 				break
 			}
 		}
 
 		var rooms Rooms
-		objects := strings.Split(*sObjects, " ")
+		objects := strings.Split(o, " ")
 
 		if *jRooms != "" {
-			err := json.Unmarshal([]byte(*jRooms), &rooms)
+			err := json.Unmarshal([]byte(r), &rooms)
 			if err != nil {
-				panic(err)
+				log.Println("The rooms map has an incorrect format: ", err)
+				continue
 			}
 		}
 		if mapPath != "" {
 			raw, err := ioutil.ReadFile(mapPath)
 			if err != nil {
-				panic(err)
+				log.Println("Unable to read room map file: ", err)
 			}
 			err = json.Unmarshal(raw, &rooms)
 			if err != nil {
-				panic(err)
+				log.Println("The rooms map has an incorrect format: ", err)
+				continue
 			}
 		}
 
-		roomsMap, steps := traverse(&rooms, *start, objects)
+		roomsMap, steps := traverse(&rooms, s, objects)
 
 		fmt.Println("ID\tRoom\t\tObject collected")
 		fmt.Println("_________________________________________")
@@ -123,8 +139,6 @@ func main() {
 		}
 		fmt.Println()
 		fmt.Println()
-		*start = 0
-		*sObjects = ""
 	}
 }
 
@@ -204,6 +218,27 @@ func getNext(edges []int, visited map[int]bool, rm map[int]*Room) *Room {
 		}
 	}
 	return nil
+}
+
+func index(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
+	io.WriteString(w, `Available routes: 
+	/rooms [POST] 
+	body: 
+	{
+		rooms:[
+			{
+				ID:0, 
+				name:string, 
+				north:0, 
+				south:0, 
+				east:0, 
+				west:0, 
+				objects:[{name:string}]
+			}
+		], 
+		start:0, 
+		objects:[string]
+	}`)
 }
 
 func handle(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
