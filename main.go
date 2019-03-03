@@ -225,19 +225,19 @@ func index(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
 	/rooms [POST] 
 	body: 
 	{
-		rooms:[
+		"rooms" : [
 			{
-				ID:0, 
-				name:string, 
-				north:0, 
-				south:0, 
-				east:0, 
-				west:0, 
-				objects:[{name:string}]
+				"ID" : 0, 
+				"name" : string, 
+				"north" : 0, 
+				"south" : 0, 
+				"east" : 0, 
+				"west" : 0, 
+				"objects" : [ { "name" : string } ]
 			}
 		], 
-		start:0, 
-		objects:[string]
+		"start" : 0, 
+		"objects" : [ string ]
 	}`)
 }
 
