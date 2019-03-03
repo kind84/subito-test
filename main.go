@@ -221,8 +221,20 @@ func getNext(edges []int, visited map[int]bool, rm map[int]*Room) *Room {
 }
 
 func index(w http.ResponseWriter, req *http.Request, _ httprouter.Params) {
-	io.WriteString(w, `Available routes: 
-	/rooms [POST] 
+	io.WriteString(w, `
+    \            \  |                          _)                |        
+   _ \          |\/ |   _`+"`"+` | _  /   _ \         |  __ \    _`+"`"+` |  |  |   | 
+  ___ \ _____|  |   |  (   |   /    __/ _____|  |  |   |  (   |  |  |   | 
+_/    _\       _|  _| \__,_| ___| \___|        _| _|  _| \__, | _| \__, | 
+                                                         |___/     ____/    
+	
+	--- Retro Route Puzzle ---
+
+
+	Available routes:
+	
+	/rooms [POST]
+	
 	body: 
 	{
 		"rooms" : [
